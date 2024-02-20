@@ -1,0 +1,273 @@
+#! /usr/bin/env python3
+
+
+import sys
+import requests
+import pdb
+import re
+import argparse
+
+
+
+
+
+
+class form_object:
+
+    def __init__(self, form):
+        self.original = form
+        self.pretty = ""
+
+        self.send_to = ""
+        self.elements = []
+
+        self.set_pretty()
+        self.set_bare()
+        self.set_elements()
+
+
+
+    
+    def get_form_start(self):
+        pattern = re.compile(r'<form[^>]*>')
+        return pattern.findall(self.pretty)
+
+    def get_inputs(self):
+        pattern = re.compile(r'<input[^>]*>')
+        return pattern.findall(self.pretty)
+
+
+    def get_input(self, inp):
+        val = None
+        try:
+            val = inp.split("value=")[1]
+            length = val.find(val[0],1)
+            val = val[1:length]
+        except:
+            pass
+
+        name = inp.split("name=")[1]
+        length = name.find(name[0],1)
+        name = name[1:length]
+
+        return (name, val)
+
+
+
+
+
+    def set_elements(self):
+        start = self.pretty.find("action=\"")+8
+        end = self.pretty.find('"', start)
+        self.send_to = self.pretty[start:end]
+        tmp = []
+
+        for element in self.elements[1:]:
+            name, val = self.get_input(element)
+            tmp.append([name, val])
+        self.elements = tmp
+
+
+
+        
+        
+
+    def set_pretty(self):
+        form = self.original.replace("\t", "")
+        self.pretty = re.sub(r'\n\s*\n', '\n', form)
+
+    def set_bare(self):
+        self.elements.append(self.get_form_start()[0])
+        for inp in self.get_inputs():
+            self.elements.append(inp)
+        
+
+
+
+    def __str__(self):
+        max = 0 
+        for e, _ in self.elements:
+            e = len(e)
+            if e > max:
+                max = e
+        
+        return f"\n{self.send_to.ljust(max)}\n" + "\n".join([f"{key.ljust(max)} : {element}" for key, element in self.elements])
+    
+
+
+
+
+def get_forms(html_page):
+
+    session = None
+    if "http" in html_page:
+        session = requests.Session()
+        r = session.get(html_page)
+        raw = r.text
+    else:
+        f = open(html_page)
+        raw = f.read()
+
+    start = 0
+
+    forms = []
+
+    while True:
+
+        last = start
+
+        start = raw.find("<form", start)
+        if start == last:
+            return session, forms
+
+        end = raw.find("</form", start)
+        end = raw.find(">", end)
+        end += 1
+
+        form = raw[start:end]
+
+        form = form_object(form)
+
+        forms.append(form)
+        
+
+def send_wordlists(address, data, user_fields, wordlists, index):
+    if index >= len(wordlists):
+        return 
+
+    key, file = wordlists[index]
+    file = open(file)
+    value = file.readline()
+    while value:
+        # reset statics
+        session, new_forms = get_forms(args.target)
+        for update_key, update_val in new_forms[0].elements:
+            if update_key not in user_fields:
+                data[update_key] = update_val
+
+        data[key] = value.replace("\n", "")
+        if index > 0:
+            r = session.post(address, data=data)
+            print(len(r.text), data)
+
+        send_wordlists(address, data, user_fields, wordlists, index+1)
+        value = file.readline()
+    file.close()
+
+
+
+def auto_send_form(args):
+    session, forms = get_forms(args.target)
+    auto = args.auto.split(",")
+
+    start = args.target.rfind("/") + 1
+    data = {}
+    wordlists = []
+    user_fields = []
+
+
+    if args.form:
+        forms = [forms[int(args.form)]]
+
+    for form_number, form in enumerate(forms):
+        for key, val in form.elements:
+            data[key] = val
+        for arg in auto:
+            key, val = arg.split("=")
+            user_fields.append(key)
+            data[key] = val
+            if "/" in val:
+                wordlists.append([key, val])
+        address = args.target[:start] + form.send_to
+
+        if len(wordlists) > 0:
+            send_wordlists(address, data, user_fields, wordlists, 0)
+            return
+                
+
+            
+                
+
+
+        r = session.post(address, data=data)
+
+        if args.verbose:
+            print(r.text)
+        else:
+            print(len(r.text), data)
+
+
+
+def prompt_send_form(session, form):
+    start = sys.argv[1].rfind("/") + 1
+    address = sys.argv[1][:start] + form.send_to
+    data = {}
+    wordlists = []
+    user_fields = []
+
+    for element in form.elements:
+        tmp = input(f"{element[0]}({element[1]}): ")
+        if len(tmp) > 0:
+            data[element[0]] = tmp
+            user_fields.append(element[0])
+        else:
+            data[element[0]] = element[1]
+        if "/" in tmp:
+            wordlists.append([element[0], tmp])
+
+
+    if len(wordlists) > 0:
+        send_wordlists(address, data, user_fields, wordlists, 0)
+        return
+
+
+    
+    print(f"sending to {address}: {data}\n")
+    r = session.post(address, data=data)
+    print(r.text)
+
+
+
+
+
+try:
+
+    parser = argparse.ArgumentParser(prog='forms', description='finds all forms, automates posting', epilog='Good luck!')
+
+    parser.add_argument('target', help="target page to parse eg: 'index.html' or 'http://10.10.10.10/index.html'")
+    parser.add_argument('-f', '--form', help="specify the form number if there are multiple forms on a page")
+    parser.add_argument('-a', '--auto', help="specify all variables via the command line, eg: 'username=admin,password=P@$$w0rd'")
+    parser.add_argument('-m', '--manual', action='store_true', help="step through each of the variables manually")
+    parser.add_argument('-v', '--verbose', action='store_true', help="print each result")
+
+
+    args = parser.parse_args()
+
+    if not args.auto and not args.manual:
+        session, forms = get_forms(args.target)
+        for form in forms:
+            print(form)
+        quit()
+
+    if args.manual:
+        session, forms = get_forms(args.target)
+        if args.form:
+            prompt_send_form(session, [forms[int(args.form)]])
+            quit()
+
+        for form in forms:
+            prompt_send_form(session, form)
+        quit()
+
+
+    if args.auto:
+        auto_send_form(args)
+        quit()
+
+
+except KeyboardInterrupt:
+    quit()
+
+
+
+
