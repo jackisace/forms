@@ -146,9 +146,13 @@ def send_wordlists(address, data, user_fields, wordlists, index):
                 data[update_key] = update_val
 
         data[key] = value.replace("\n", "")
-        if index > 0:
-            r = session.post(address, data=data)
+        r = session.post(address, data=data)
+        if "A user was found" in r.text:
             print(len(r.text), data)
+
+        if args.verbose:
+            print(r.text)
+
 
         send_wordlists(address, data, user_fields, wordlists, index+1)
         value = file.readline()
@@ -179,6 +183,8 @@ def auto_send_form(args):
             if "/" in val:
                 wordlists.append([key, val])
         address = args.target[:start] + form.send_to
+        if "http" in form.send_to:
+            address = form.send_to
 
         if len(wordlists) > 0:
             send_wordlists(address, data, user_fields, wordlists, 0)
