@@ -8,6 +8,7 @@ import copy
 import sys
 
 
+# parse user inputs
 parser = argparse.ArgumentParser(prog='forms', description='finds all forms, automates posting', epilog='Good luck!')          
 parser.add_argument('target', help="target page to parse eg: 'http://10.10.10.10/index.html'")
 parser.add_argument('-f', '--form', help="specify the form number if there are multiple forms on a page", default=0)
@@ -18,14 +19,14 @@ parser.add_argument('-v', '--verbose', action='store_true', help="print all form
 parser.add_argument('-vv', '--vverbose', action='store_true', help="print each result data and it's header")
 args = parser.parse_args()
 
+# check for errors
 if args.form:
     try:
         args.form = int(args.form)
     except:
         print("form number must be an integer")
         exit()
-
-
+        
 if args.proxy:
     try:
         args.proxy = {"http":args.proxy, "https":args.proxy}
@@ -33,58 +34,47 @@ if args.proxy:
         print("proxy failed to initialize")
         exit()
 
-if not args.auto:
-    session = requests.Session()
-    request = session.get(args.target, proxies=args.proxy)
-    soup = BeautifulSoup(request.content, "html.parser")
-    forms = soup.find_all("form")
-    for i, form in enumerate(forms):
-        print(f"FORM: {i}:")
-        print(f"=========")
-        action = form.get("action")
-        print(f"action: {action}")
-        inputs = form.find_all("input")
-        for inp in inputs:
-            name = inp.get("name")
-            value = inp.get("value")
-            print(f"{name}: {value}")
-        print("\n")
-    exit()
     
 
 def send_form(fields, f=None):
-    """ send the form with the user supplied fields """
-    
+    """ send the form with the user supplied fields, f is the file, if one has been specified """
+
     global args
     session = requests.Session()
-    fields = copy.copy(fields)
 
+
+    # if a file has been passed, copy fields to not overwrite the original,
+    # read the next line and update the new fields with that line
     if f:
+        fields = copy.copy(fields)
         try:
             line = f.readline().replace("\n", "")
         except:
             return False
         if not line:
-            return False
-        
+            return False  
         for key, val in fields.items():
             if "/" in val:
                 fields[key] = line
-        
+
+    # get the latest page values
     request = session.get(args.target, proxies=args.proxy)
     soup = BeautifulSoup(request.content, "html.parser")
     form = soup.find_all("form")[args.form]
     action = form.get("action")
     inputs = form.find_all("input")
 
+    # create the values dict
     values = {}
     for inp in inputs:
         values[inp.get("name")] = inp.get("value")
     for key, val in fields.items():
         values[key] = val
 
+    # send the request
     request = session.post(args.target + action, data=values, proxies=args.proxy)
 
+    # print output to the user
     print(f"status: {request.status_code} \t length: {len(request.text)} \t fields: {fields}")
     
     if args.verbose:
@@ -96,24 +86,46 @@ def send_form(fields, f=None):
         print(request.text)
 
 
-        
-if args.auto:
-    fields = dict((a.strip(), b.strip())
-        for a, b in (element.split('=')
-            for element in args.auto.split(',')))
-    for k,v in fields.items():
-        if "/" in v:
-            executor = concurrent.futures.ThreadPoolExecutor(max_workers=int(args.threads))
-            f = open(v)
-            
-            while True:
-                e = executor.submit(send_form, fields, f)
-                
-                if e.result() == False:
-                    f.close()
-                    exit()
-    send_form(fields)
+if __name__ == "__main__":
 
+    # user just wants to see the forms available on a page
+    if not args.auto:
+        session = requests.Session()
+        request = session.get(args.target, proxies=args.proxy)
+        soup = BeautifulSoup(request.content, "html.parser")
+        forms = soup.find_all("form")
+        for i, form in enumerate(forms):
+            print(f"FORM: {i}:")
+            print(f"=========")
+            action = form.get("action")
+            print(f"action: {action}")
+            inputs = form.find_all("input")
+            for inp in inputs:
+                name = inp.get("name")
+                value = inp.get("value")
+                print(f"{name}: {value}")
+            print("\n")
+        exit()
+    
+    
+    # user wants to automate sending the form
+    if args.auto:
+        fields = dict((a.strip(), b.strip())
+            for a, b in (element.split('=')
+                for element in args.auto.split(',')))
+        for k,v in fields.items():
+            if "/" in v:
+                executor = concurrent.futures.ThreadPoolExecutor(max_workers=int(args.threads))
+                f = open(v)
+                
+                while True:
+                    e = executor.submit(send_form, fields, f)
+                    
+                    if e.result() == False:
+                        f.close()
+                        exit()
+        send_form(fields)
+    
     
 
     
