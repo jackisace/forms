@@ -19,11 +19,11 @@ password: None
 Login: Login
 user_token: b00d9be2028e114a94a08c6227cf9d58
 
-$ | 
+$ 
 ```
 
 ## quick test
-``` sh
+``` console
 $ forms http://127.0.0.1:8000/ -a "username=admin,password=password"
 status: 501 	 length: 497 	 fields: {'username': 'admin', 'password': 'password'}
 $ forms http://127.0.0.1:8000/ -a "username=admin,password=admin"
