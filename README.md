@@ -29,8 +29,22 @@ forms http://127.0.0.1:8000/ -a "username=admin,password=admin"
 ```
 
 ## typical password bruteforce usage
-``` sh
-forms http://127.0.0.1:8000/ -a "username=admin,password=/usr/share/wordlists/rockyou.txt"
+``` console
+$ forms http://127.0.0.1:8000/ -a "username=admin,password=/usr/share/wordlists/rockyou.txt"
+status: 501 	 length: 497 	 fields: {'username': 'admin', 'password': '123456'}
+status: 501 	 length: 497 	 fields: {'username': 'admin', 'password': '12345'}
+status: 501 	 length: 497 	 fields: {'username': 'admin', 'password': '123456789'}
+status: 501 	 length: 497 	 fields: {'username': 'admin', 'password': 'password'}
+status: 501 	 length: 497 	 fields: {'username': 'admin', 'password': 'iloveyou'}
+status: 501 	 length: 497 	 fields: {'username': 'admin', 'password': 'princess'}
+status: 501 	 length: 497 	 fields: {'username': 'admin', 'password': '1234567'}
+status: 501 	 length: 497 	 fields: {'username': 'admin', 'password': '12345678'}
+status: 501 	 length: 497 	 fields: {'username': 'admin', 'password': 'abc123'}
+status: 501 	 length: 497 	 fields: {'username': 'admin', 'password': 'nicole'}
+status: 501 	 length: 497 	 fields: {'username': 'admin', 'password': 'daniel'}
+status: 501 	 length: 497 	 fields: {'username': 'admin', 'password': 'babygirl'}
+status: 501 	 length: 497 	 fields: {'username': 'admin', 'password': 'monkey'}
+...
 ```
 
 ## usage
