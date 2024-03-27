@@ -60,7 +60,14 @@ def send_form(fields, f=None):
     # get the latest page values
     request = session.get(args.target, proxies=args.proxy)
     soup = BeautifulSoup(request.content, "html.parser")
-    form = soup.find_all("form")[args.form]
+
+    # check there are enoough forms
+    try:
+        form = soup.find_all("form")[args.form]
+    except:
+        print("there aren't enough forms at the page you requested")
+        exit()
+    
     action = form.get("action")
     inputs = form.find_all("input")
 

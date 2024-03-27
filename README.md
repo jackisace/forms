@@ -1,7 +1,5 @@
 # forms
 
-This tool is intended for ethical purposes only.
-
 
 ## install
 ``` sh
@@ -10,9 +8,29 @@ cd forms
 sh install.sh
 ```
 
-## typical usage
+## initial enumeration
+``` console
+$ forms http://127.0.0.1:8000/ 
+FORM: 0:
+=========
+action: login.php
+username: None
+password: None
+Login: Login
+user_token: b00d9be2028e114a94a08c6227cf9d58
+
+$ | 
+```
+
+## quick test
 ``` sh
-forms http://127.0.0.1:8000/ -a "username=admin,password=rockyou.txt"
+forms http://127.0.0.1:8000/ -a "username=admin,password=password"
+forms http://127.0.0.1:8000/ -a "username=admin,password=admin"
+```
+
+## typical password bruteforce usage
+``` sh
+forms http://127.0.0.1:8000/ -a "username=admin,password=/usr/share/wordlists/rockyou.txt"
 ```
 
 ## usage
