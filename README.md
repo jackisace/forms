@@ -48,6 +48,12 @@ status: 501 	 length: 497 	 fields: {'username': 'admin', 'password': 'monkey'}
 ...
 ```
 
+## bruteforcing multiple lists
+``` sh
+$ for user in $(cat users); do forms http://127.0.0.1:8000/ -a "username=$user,password=/usr/share/wordlists/rockyou.txt"; done
+```
+
+
 ## usage
 ``` console
 $ forms --help
