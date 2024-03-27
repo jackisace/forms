@@ -24,8 +24,10 @@ $ |
 
 ## quick test
 ``` sh
-forms http://127.0.0.1:8000/ -a "username=admin,password=password"
-forms http://127.0.0.1:8000/ -a "username=admin,password=admin"
+$ forms http://127.0.0.1:8000/ -a "username=admin,password=password"
+status: 501 	 length: 497 	 fields: {'username': 'admin', 'password': 'password'}
+$ forms http://127.0.0.1:8000/ -a "username=admin,password=admin"
+status: 501 	 length: 497 	 fields: {'username': 'admin', 'password': 'admin'}
 ```
 
 ## typical password bruteforce usage
