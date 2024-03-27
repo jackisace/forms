@@ -3,7 +3,7 @@
 
 ## install
 ``` sh
-git clone https://github.com/jackisace/forms.git; sh forms/install.sh; rm -rf forms
+git clone https://github.com/jackisace/forms.git; chmod +x forms/forms; sudo cp forms /usr/bin/forms; rm -rf forms
 
 ```
 
