@@ -67,19 +67,36 @@ def send_form(fields, f=None):
     except:
         print("there aren't enough forms at the page you requested")
         exit()
-    
+
+    # setup and clean action variable
     action = form.get("action")
+    if action == "None" or action == "none" or action == "#" or action == None:
+        action = ""
+
+    # setup post_url variable
+    post_url = args.target + action
+    if post_url.count("https://") > 1:
+        post_url = post_url.split("https://")[1]
+    if post_url.count("http://") > 1:
+        post_url = post_url.split("http://")[1]    
     inputs = form.find_all("input")
 
     # create the values dict
     values = {}
     for inp in inputs:
-        values[inp.get("name")] = inp.get("value")
+
+        # clean the value
+        if inp.get("value") == None:
+            values[inp.get("name")] = ""
+        else:
+            values[inp.get("name")] = inp.get("value")
+
+    # overwrite with personal
     for key, val in fields.items():
         values[key] = val
 
     # send the request
-    request = session.post(args.target + action, data=values, proxies=args.proxy)
+    request = session.post(post_url, data=values, proxies=args.proxy)
 
     # print output to the user
     print(f"status: {request.status_code} \t length: {len(request.text)} \t fields: {fields}")
