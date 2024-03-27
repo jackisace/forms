@@ -76,9 +76,10 @@ def send_form(fields, f=None):
     # setup post_url variable
     post_url = args.target + action
     if post_url.count("https://") > 1:
-        post_url = post_url.split("https://")[1]
+        post_url = post_url[post_url.rfind("https://"):]
     if post_url.count("http://") > 1:
-        post_url = post_url.split("http://")[1]    
+        post_url = post_url[post_url.rfind("http://"):]
+
     inputs = form.find_all("input")
 
     # create the values dict
