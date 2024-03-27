@@ -1,15 +1,21 @@
 # forms
 
-forms is a tool which makes automating the process for posting forms much easier.
+This tool is intended for ethical purposes only.
 
-The tool is intended for ethical purposes only.
 
+## install
 ``` sh
 git clone https://github.com/jackisace/forms.git
 cd forms
 sh install.sh
 ```
 
+## typical usage
+``` sh
+forms http://127.0.0.1:8000/ -a "username=admin,password=rockyou.txt"
+```
+
+## usage
 ``` console
 $ forms --help
 usage: forms [-h] [-f FORM] [-a AUTO] [-t THREADS] [-p PROXY] [-v] [-vv] target
