@@ -85,6 +85,10 @@ def send_form(fields, f=None):
     values = {}
     for inp in inputs:
 
+        # skip if there is no name
+        if inp.get("name") == None or inp.get("name") == "":
+            continue
+        
         # clean the value
         if inp.get("value") == None:
             values[inp.get("name")] = ""
@@ -122,12 +126,18 @@ if __name__ == "__main__":
             print(f"FORM: {i}:")
             print(f"=========")
             action = form.get("action")
-            print(f"action: {action}")
+            if action == None:
+                print(f"action: /")
+            else:
+                print(f"action: {action}")
             inputs = form.find_all("input")
             for inp in inputs:
                 name = inp.get("name")
                 value = inp.get("value")
-                print(f"{name}: {value}")
+                if name and value:
+                    print(f"{name}: {value}")
+                if name and not value:
+                    print(f"{name}: ")                
             print("\n")
         exit()
     

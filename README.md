@@ -29,6 +29,35 @@ $ forms http://127.0.0.1:8000/ -a "username=admin,password=admin"
 status: 501 	 length: 497 	 fields: {'username': 'admin', 'password': 'admin'}
 ```
 
+## multiple forms support
+``` console
+$ forms http://127.0.0.1:8000/
+FORM: 0:
+=========
+action: register.php
+email: 
+password:
+
+
+FORM: 1:
+=========
+action: post_comment.php
+comment:
+
+
+FORM: 2:
+=========
+action: login.php
+email: 
+password:
+
+
+$ forms http://127.0.0.1:8000/ -f 2 "email=admin@admin.com,password=password"
+status: 200 	 length: 673 	 fields: {'email': 'admin@admin.com', 'password': 'password'}
+
+```
+
+
 ## typical password bruteforce usage
 ``` console
 $ forms http://127.0.0.1:8000/ -a "username=admin,password=/usr/share/wordlists/rockyou.txt"
