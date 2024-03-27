@@ -1,9 +1,37 @@
-# formFinder
+# forms
 
-formFinder will be used to find forms from a single web page and print it out
+forms is a tool which makes automating the process for posting forms much easier.
 
-it will also be used to provide inputs for posting forms
+The tool is intended for ethical purposes only.
 
-after that it will provide automation utility 
-"# forms" 
-"# forms" 
+``` sh
+git clone https://github.com/jackisace/forms.git
+cd forms
+sh install.sh
+```
+
+``` console
+$ forms --help
+usage: forms [-h] [-f FORM] [-a AUTO] [-t THREADS] [-p PROXY] [-v] [-vv] target
+
+finds all forms, displays them, and automates posting
+
+positional arguments:
+  target                target page to parse eg: 'http://10.10.10.10/index.html'
+
+options:
+  -h, --help            show this help message and exit
+  -f FORM, --form FORM  specify the form number if there are multiple forms on a page
+  -a AUTO, --auto AUTO  specify all variables via the command line, eg:
+                        'username=admin,password=P@$$w0rd' or 'user=admin,password=./list'. Filenames
+                        without a '/' character in will be read as a single word and not opened as a
+                        file
+  -t THREADS, --threads THREADS
+                        specify the number of threads (default: 10)
+  -p PROXY, --proxy PROXY
+                        set a proxy eg. -p http://127.0.0.1:8080
+  -v, --verbose         print all form values
+  -vv, --vverbose       print each result data and it's header
+
+Good luck!
+```
