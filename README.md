@@ -3,9 +3,7 @@
 
 ## install
 ``` sh
-git clone https://github.com/jackisace/forms.git
-cd forms
-sh install.sh
+git clone https://github.com/jackisace/forms.git; sh forms/install.sh; rm -rf forms
 
 ```
 
