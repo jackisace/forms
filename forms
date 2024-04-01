@@ -151,7 +151,10 @@ if __name__ == "__main__":
         for k,v in fields.items():
             if "/" in v:
                 executor = concurrent.futures.ThreadPoolExecutor(max_workers=int(args.threads))
-                f = open(v)
+                try:
+                    f = open(v)
+                except:
+                    continue
                 
                 while True:
                     e = executor.submit(send_form, fields, f)
