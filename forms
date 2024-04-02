@@ -108,7 +108,7 @@ def send_form(fields, log, f=None):
 
     # format logging
     headers = ''.join([str((k, v)) for k, v in request.headers.items()])
-    log.write(f"status: {request.status_code} \t length: {len(request.text)} \t fields: {values} \t headers: {headers} text: {request.text}".replace("\n",""))
+    log.write(f"status: {request.status_code} \t length: {len(request.text)} \t fields: {values} \t headers: {headers} text: {request.text}".replace("\n","\\n"))
     log.write("\n\n")
     
     if args.verbose:
